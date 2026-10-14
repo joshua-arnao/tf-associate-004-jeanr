@@ -52,3 +52,42 @@ D) Maintain configuration management for servers and export the current VMs as g
 **D) teams no longer need to understand cloud-specific services and features**
 * **¿Es correcta?** **NO.**
 * **¿Por qué?** Esta es una de las trampas más recurrentes y peligrosas de la certificación. Aunque Terraform unifica el flujo de trabajo, **NO abstrae la infraestructura subyacente**. El equipo de DevOps aún necesita entender perfectamente cómo funcionan los servicios específicos de cada proveedor. Sigues necesitando saber qué es una VPC y una AMI en AWS, o qué es un Resource Group y una VNet en Azure. Terraform no convierte automáticamente un concepto de AWS en uno de Azure; solo te da un lenguaje común para declararlos.
+
+4. **Why is using a single tool like Terraform for multi-cloud deployments more beneficial than using separate tools and workflows for each cloud?**
+
+**A) It provides a common workflow and reusable modules, enabling consistent CI/CD and policy across clouds.**
+* **¿Es correcta?** **SÍ.**
+* **¿Por qué?** Esta es la ventaja fundamental de Terraform. Al centralizar todo en una sola herramienta, logras tener el mismo flujo de trabajo (`init`, `plan`, `apply`) e implementar **módulos reutilizables** que estandarizan el diseño. Esto te permite construir tuberías de CI/CD uniformes y aplicar políticas de seguridad idénticas (como OPA o Sentinel) para todas tus nubes, reduciendo drásticamente la fricción operativa.
+
+**B) It guarantees identical resource types and APIs across all clouds, eliminating any provider-specific differences.**
+* **¿Es correcta?** **NO.**
+* **¿Por qué?** Terraform **NO unifica los tipos de recursos ni las APIs** de los proveedores. Sigues teniendo recursos totalmente diferentes según la nube (ej. `aws_instance` vs. `azurerm_linux_virtual_machine`). Las diferencias específicas de cada API del proveedor siguen existiendo y debes conocerlas.
+
+**C) It eliminates the need for cloud-specific credentials, since a single token works across all providers by default.**
+* **¿Es correcta?** **NO.**
+* **¿Por qué?** Es completamente falso. Terraform no unifica la autenticación de las nubes. Para desplegar recursos, sigues necesitando configurar e ingresar las credenciales específicas y los accesos de seguridad de cada proveedor de manera independiente (las claves de AWS para el provider de AWS y los datos del Service Principal para Azure). No existe un token único universal por defecto.
+
+**D) It automatically migrates existing resources provisioned from other tools into Terraform without refactoring.**
+* **¿Es correcta?** **NO.**
+* **¿Por qué?** Terraform no hace migraciones mágicas automáticas desde otras herramientas (como CloudFormation o ARM templates) sin necesidad de modificar el código (*without refactoring*). Si tienes recursos antiguos creados fuera de Terraform, tienes que escribir el código HCL correspondiente manualmente y realizar un proceso controlado usando el comando `terraform import` o bloques `import`, lo cual sí requiere esfuerzo de refactorización y diseño de código.
+Usa el código con precaución.
+¡Excelente! Esta pregunta refuerza fuertemente el beneficio de los módulos reutilizables y la consistencia en CI/CD.
+¿Tienes más imágenes de preguntas listas para que las desglosemos de esta manera? Si no, avísame si pasamos a estudiar a fondo el archivo terraform.tfstate, que es el responsable directo de que ese workflow funcione.
+
+5. **What benefits would you see by using a multi-cloud and provider-agnostic tool like Terraform? (select two)**
+
+**A) Reduces operational overhead by allowing teams to learn and govern a single tool across all environments.**
+* **¿Es correcta?** **SÍ.**
+* **¿Por qué?** Reducir la carga operativa (*operational overhead*) es uno de los objetivos principales de DevOps. Al adoptar una única herramienta común para toda la infraestructura (ya sea AWS, Azure, centros de datos locales, etc.), evitas que tus ingenieros tengan que especializarse por separado en múltiples tecnologías de aprovisionamiento distintas. La gobernanza y el aprendizaje se simplifican drásticamente bajo un único estándar organizativo.
+
+**B) Delivers a consistent declarative workflow and language across providers and hypervisors.**
+* **¿Es correcta?** **SÍ.**
+* **¿Por qué?** Esta opción describe a la perfección la esencia de Terraform. Te entrega consistencia absoluta mediante el uso de un lenguaje declarativo unificado (**HCL**) y un flujo operativo idéntico (`init`, `plan`, `apply`, `destroy`), sin importar si estás interactuando con nubes públicas (*providers*) o entornos de virtualización locales como VMware o Nutanix (*hypervisors*).
+
+**C) Removes the need for provider-specific credentials or authentication flows.**
+* **¿Es correcta?** **NO.**
+* **¿Por qué?** Terraform no elimina las necesidades de seguridad ni los flujos de autenticación de cada proveedor. Sigues necesitando configurar por separado las llaves secretas de AWS, las credenciales de Azure, o los accesos de tus hipervisores locales para que Terraform pueda actuar legítimamente en tu nombre.
+
+**D) Programmatically standardizes pricing and usage models across all cloud platforms.**
+* **¿Es correcta?** **NO.**
+* **¿Por qué?** Es completamente falso. Terraform no estandariza ni altera de ninguna forma los modelos de precios (*pricing*) o las políticas de cobro por uso de los proveedores de nube. AWS te cobrará según sus métricas de facturación y Azure según las suyas. Terraform solo se encarga del aprovisionamiento técnico de los recursos, no tiene ningún control sobre las estructuras comerciales y de costos nativas de las plataformas en la nube.
